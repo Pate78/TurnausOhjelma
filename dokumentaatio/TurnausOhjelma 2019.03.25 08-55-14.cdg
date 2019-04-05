@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ClassDiagram name="TurnausOhjelma">
+  <ClassDiagramComponents>
+    <Class name="ApplicationLogic" package="tournamentprogram" visibility="public" xPosition="20.0" yPosition="20.0">
+      <Fields>
+        <Field name="teams" type="ArrayList&lt;Team&gt;" visibility="private"/>
+        <Field name="games" type="ArrayList&lt;Game&gt;" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public"/>
+      </Constructors>
+      <Methods>
+        <Method name="addTeam" returnType="void" visibility="public">
+          <Argument type="String" name="name"/>
+        </Method>
+        <Method name="getTeams" returnType="ArrayList&lt;Team&gt;" visibility="public"/>
+        <Method name="getTeam" returnType="Team" visibility="public">
+          <Argument type="String" name="teamPane"/>
+        </Method>
+        <Method name="addPlayerToTeam" returnType="boolean" visibility="public">
+          <Argument type="Player" name="playerToAdd"/>
+          <Argument type="String" name="place"/>
+          <Argument type="Team" name="team"/>
+        </Method>
+        <Method name="removePlayerFromTeam" returnType="boolean" visibility="public">
+          <Argument type="Player" name="playerToRemove"/>
+          <Argument type="Team" name="team"/>
+          <Argument type="String" name="place"/>
+        </Method>
+        <Method name="getPlayersOfTeam" returnType="Map&lt;String, ArrayList&lt;Player&gt;&gt;" visibility="public">
+          <Argument type="String" name="name"/>
+        </Method>
+        <Method name="createGame" returnType="void" visibility="public">
+          <Argument type="Team" name="home"/>
+          <Argument type="Team" name="visitor"/>
+        </Method>
+        <Method name="getHomeTeamOfGame" returnType="Team" visibility="public">
+          <Argument type="Game" name="game"/>
+        </Method>
+        <Method name="getVisitorTeamOfGame" returnType="Team" visibility="public">
+          <Argument type="Game" name="game"/>
+        </Method>
+        <Method name="getGame" returnType="Game" visibility="public">
+          <Argument type="String" name="home"/>
+          <Argument type="String" name="visitor"/>
+        </Method>
+        <Method name="getGames" returnType="ArrayList&lt;Game&gt;" visibility="public"/>
+        <Method name="removeTeamFromGame" returnType="void" visibility="public">
+          <Argument type="Team" name="t"/>
+          <Argument type="int" name="index"/>
+        </Method>
+        <Method name="getPlayer" returnType="Player" visibility="public">
+          <Argument type="String" name="teamName"/>
+          <Argument type="String" name="fname"/>
+          <Argument type="String" name="lname"/>
+        </Method>
+        <Method name="getPlayer" returnType="Player" visibility="public">
+          <Argument type="String" name="fname"/>
+          <Argument type="String" name="lname"/>
+        </Method>
+        <Method name="getIndexOfTeam" returnType="int" visibility="private">
+          <Argument type="Team" name="team"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="Game" package="tournamentprogram" visibility="public" xPosition="320.0" yPosition="20.0">
+      <Fields>
+        <Field name="homeTeam" type="Team" visibility="private"/>
+        <Field name="visitorTeam" type="Team" visibility="private"/>
+        <Field name="goals" type="List&lt;Goal&gt;" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="Team" name="homeTeam"/>
+          <Argument type="Team" name="vistitorTeam"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="addGoal" returnType="void" visibility="public">
+          <Argument type="Player" name="p"/>
+          <Argument type="ArrayList&lt;Player&gt;" name="assists"/>
+          <Argument type="String" name="time"/>
+        </Method>
+        <Method name="removeGoal" returnType="void" visibility="public">
+          <Argument type="int" name="whatGoalToRemove"/>
+        </Method>
+        <Method name="removeTeamFromGame" returnType="boolean" visibility="public">
+          <Argument type="String" name="name"/>
+        </Method>
+        <Method name="setHomeTeam" returnType="void" visibility="public">
+          <Argument type="Team" name="t"/>
+        </Method>
+        <Method name="setVisitorTeam" returnType="void" visibility="public">
+          <Argument type="Team" name="t"/>
+        </Method>
+        <Method name="getGoals" returnType="List&lt;Goal&gt;" visibility="public"/>
+        <Method name="getHomeTeam" returnType="Team" visibility="public"/>
+        <Method name="getVisitorTeam" returnType="Team" visibility="public"/>
+        <Method name="toString" returnType="String" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="GamesTabUI" package="tournamentprogram" visibility="public" xPosition="620.0" yPosition="20.0">
+      <Fields>
+        <Field name="logic" type="ApplicationLogic" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="ApplicationLogic" name="logic"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="createGamesTab" returnType="Tab" visibility="public">
+          <Argument type="ApplicationLogic" name="logic"/>
+        </Method>
+        <Method name="updateAccordion" returnType="void" visibility="private">
+          <Argument type="VBox" name="mainBox"/>
+        </Method>
+        <Method name="addGameGrid" returnType="void" visibility="private">
+          <Argument type="VBox" name="mainBox"/>
+        </Method>
+        <Method name="getComboBox" returnType="ComboBox&lt;String&gt;" visibility="public">
+          <Argument type="ArrayList&lt;Team&gt;" name="teams"/>
+        </Method>
+        <Method name="createBasicTab" returnType="Tab" visibility="private">
+          <Argument type="String" name="header"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="Goal" package="tournamentprogram" visibility="public" xPosition="920.0" yPosition="20.0">
+      <Fields>
+        <Field name="player" type="Player" visibility="private"/>
+        <Field name="assists" type="ArrayList&lt;Player&gt;" visibility="private"/>
+        <Field name="time" type="String" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="Player" name="player"/>
+          <Argument type="ArrayList&lt;Player&gt;" name="assist"/>
+          <Argument type="String" name="time"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="getPlayer" returnType="Player" visibility="public"/>
+        <Method name="getAssist" returnType="ArrayList&lt;Player&gt;" visibility="public"/>
+        <Method name="getTime" returnType="String" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="Player" package="tournamentprogram" visibility="public" xPosition="1220.0" yPosition="20.0">
+      <Fields>
+        <Field name="firstname" type="String" visibility="private"/>
+        <Field name="lastname" type="String" visibility="private"/>
+        <Field name="number" type="int" visibility="private"/>
+        <Field name="goals" type="int" visibility="private"/>
+        <Field name="assists" type="int" visibility="private"/>
+        <Field name="t" type="Team" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="firstname"/>
+          <Argument type="String" name="lastname"/>
+          <Argument type="int" name="number"/>
+          <Argument type="Team" name="t"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="addGoal" returnType="void" visibility="public"/>
+        <Method name="addAssist" returnType="void" visibility="public"/>
+        <Method name="removeAssist" returnType="void" visibility="public"/>
+        <Method name="getAssists" returnType="int" visibility="public"/>
+        <Method name="removeGoal" returnType="boolean" visibility="public"/>
+        <Method name="getGoals" returnType="int" visibility="public"/>
+        <Method name="getFirstName" returnType="String" visibility="public"/>
+        <Method name="getLastName" returnType="String" visibility="public"/>
+        <Method name="getNumber" returnType="int" visibility="public"/>
+        <Method name="setNumber" returnType="boolean" visibility="public">
+          <Argument type="int" name="number"/>
+        </Method>
+        <Method name="compareTo" returnType="int" visibility="public">
+          <Argument type="Player" name="o"/>
+        </Method>
+        <Method name="toString" returnType="String" visibility="public"/>
+        <Method name="hashCode" returnType="int" visibility="public"/>
+        <Method name="equals" returnType="boolean" visibility="public">
+          <Argument type="Object" name="obj"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="Team" package="tournamentprogram" visibility="public" xPosition="1520.0" yPosition="20.0">
+      <Fields>
+        <Field name="teamName" type="String" visibility="private"/>
+        <Field name="playersOffence" type="ArrayList&lt;Player&gt;" visibility="private"/>
+        <Field name="playersDefence" type="ArrayList&lt;Player&gt;" visibility="private"/>
+        <Field name="playersGoalkeepers" type="ArrayList&lt;Player&gt;" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="teamName"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="addPlayer" returnType="void" visibility="public">
+          <Argument type="Player" name="player"/>
+          <Argument type="String" name="place"/>
+        </Method>
+        <Method name="getOffencePlayers" returnType="List&lt;Player&gt;" visibility="public"/>
+        <Method name="getDefencePlayers" returnType="List&lt;Player&gt;" visibility="public"/>
+        <Method name="getGoalkeepers" returnType="ArrayList&lt;Player&gt;" visibility="public"/>
+        <Method name="getAllPlayersWithPosition" returnType="Map&lt;String, ArrayList&lt;Player&gt;&gt;" visibility="public"/>
+        <Method name="getAllPlayersInArrayList" returnType="ArrayList&lt;Player&gt;" visibility="public"/>
+        <Method name="getName" returnType="String" visibility="public"/>
+        <Method name="getPlayer" returnType="Player" visibility="public">
+          <Argument type="String" name="fname"/>
+          <Argument type="String" name="lname"/>
+        </Method>
+        <Method name="removePlayer" returnType="void" visibility="public">
+          <Argument type="Player" name="player"/>
+          <Argument type="String" name="place"/>
+        </Method>
+        <Method name="toString" returnType="String" visibility="public"/>
+        <Method name="hashCode" returnType="int" visibility="public"/>
+        <Method name="equals" returnType="boolean" visibility="public">
+          <Argument type="Object" name="obj"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="TeamsTabUI" package="tournamentprogram" visibility="public" xPosition="1820.0" yPosition="20.0">
+      <Fields>
+        <Field name="logic" type="ApplicationLogic" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="ApplicationLogic" name="logic"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="createTeamsTab" returnType="Tab" visibility="public"/>
+        <Method name="listTeams" returnType="void" visibility="private">
+          <Argument type="VBox" name="vboxForTeams"/>
+          <Argument type="Accordion" name="acc"/>
+        </Method>
+        <Method name="updatePlayersBox" returnType="void" visibility="private">
+          <Argument type="Team" name="t"/>
+          <Argument type="VBox" name="playersInVBox"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="UserInterface" package="tournamentprogram" visibility="public" xPosition="2120.0" yPosition="20.0">
+      <Fields/>
+      <Constructors/>
+      <Methods>
+        <Method name="start" returnType="void" visibility="public">
+          <Argument type="Stage" name="primaryStage"/>
+        </Method>
+        <Method name="main" returnType="void" visibility="public" isStatic="true">
+          <Argument type="String[]" name="args"/>
+        </Method>
+      </Methods>
+    </Class>
+  </ClassDiagramComponents>
+  <ClassDiagramRelations>
+    <UseRelation source="tournamentprogram.ApplicationLogic" target="tournamentprogram.Team" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="player" source="tournamentprogram.Goal" target="tournamentprogram.Player" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="tournamentprogram.ApplicationLogic" target="tournamentprogram.Player" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="tournamentprogram.Game" target="tournamentprogram.Player" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="tournamentprogram.Game" target="tournamentprogram.Team" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="playersGoalkeepers" source="tournamentprogram.Team" target="tournamentprogram.Player" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Player&gt;"/>
+    <HasRelation name="assists" source="tournamentprogram.Goal" target="tournamentprogram.Player" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Player&gt;"/>
+    <HasRelation name="games" source="tournamentprogram.ApplicationLogic" target="tournamentprogram.Game" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Game&gt;"/>
+    <UseRelation source="tournamentprogram.TeamsTabUI" target="tournamentprogram.Team" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="playersDefence" source="tournamentprogram.Team" target="tournamentprogram.Player" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Player&gt;"/>
+    <UseRelation source="tournamentprogram.ApplicationLogic" target="tournamentprogram.Game" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="tournamentprogram.GamesTabUI" target="tournamentprogram.ApplicationLogic" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="logic" source="tournamentprogram.TeamsTabUI" target="tournamentprogram.ApplicationLogic" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="playersOffence" source="tournamentprogram.Team" target="tournamentprogram.Player" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Player&gt;"/>
+    <UseRelation source="tournamentprogram.Team" target="tournamentprogram.Player" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="tournamentprogram.Goal" target="tournamentprogram.Player" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="homeTeam" source="tournamentprogram.Game" target="tournamentprogram.Team" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="logic" source="tournamentprogram.GamesTabUI" target="tournamentprogram.ApplicationLogic" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="goals" source="tournamentprogram.Game" target="tournamentprogram.Goal" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="List&lt;Goal&gt;"/>
+    <UseRelation source="tournamentprogram.GamesTabUI" target="tournamentprogram.Team" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="visitorTeam" source="tournamentprogram.Game" target="tournamentprogram.Team" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="tournamentprogram.Player" target="tournamentprogram.Player" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="teams" source="tournamentprogram.ApplicationLogic" target="tournamentprogram.Team" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Team&gt;"/>
+    <UseRelation source="tournamentprogram.Game" target="tournamentprogram.Goal" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="t" source="tournamentprogram.Player" target="tournamentprogram.Team" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+  </ClassDiagramRelations>
+</ClassDiagram>

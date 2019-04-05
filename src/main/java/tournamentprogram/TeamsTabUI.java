@@ -6,13 +6,20 @@
 package tournamentprogram;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Observable;
+import java.util.Set;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -27,162 +34,159 @@ import javafx.scene.layout.VBox;
  * @author pitkapa7
  */
 public class TeamsTabUI {
+
     private ApplicationLogic logic;
 
     public TeamsTabUI(ApplicationLogic logic) {
         this.logic = logic;
     }
-    
-    
-    public Tab createTeamsTab(){
 
-        Tab teams = createBasicTab("Teams");
-        Button addButton = new Button("Add team");
-//        Button modifyButton = new Button("Modify team");
-        Button saveTeamButton = new Button("Save team");
-        Button cancelAddTeamButton = new Button("Cancel");
-
-        TextField teamName = new TextField("Team name");
-        VBox leftBox = new VBox();
-//        VBox centerBox = new VBox();
-       
-        leftBox.getChildren().addAll(addButton);
-
-        BorderPane tabPanel = (BorderPane)teams.getContent();
-        
-        
-        
-        /** Action listeners for the Teams tab.*/
-        addButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                VBox addBox = new VBox(teamName, saveTeamButton, cancelAddTeamButton);
-                tabPanel.setCenter(addBox);
-                addButton.setDisable(true);
-            }
-        });
-        
-        saveTeamButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                logic.addTeam(teamName.getText());
-//                centerBox.getChildren().clear();
-                ArrayList<Team> savedTeams = logic.getTeams();
-
-                tabPanel.setCenter(teamsInAccordion());
-                addButton.setDisable(false);
-            }
-        });
-        
-        cancelAddTeamButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-//                centerBox.getChildren().clear();
-//                System.out.println("cancelbutton clicked");
-                tabPanel.setCenter(teamsInAccordion());
-                addButton.setDisable(false);
-            }
-        });
-        
-        tabPanel.setLeft(leftBox);
-        
-        tabPanel.setCenter(teamsInAccordion());
-        return teams;
-    }
-
-    
-    /** This will create accordion where all teams and their players are listed */
-    private Accordion teamsInAccordion() {
+    public Tab createTeamsTab() {
+        Tab tab = new Tab("Teams");
+        VBox mainBox = new VBox();
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setContent(mainBox);
+        tab.setContent(scrollPane);
+        VBox teamsInVbox = new VBox();
+        HBox addTeamBox = new HBox();
+        Button addTeamBtn = new Button("Add Team");
+        TextField teamName = new TextField();
+        addTeamBox.getChildren().addAll(addTeamBtn, teamName);
         Accordion acc = new Accordion();
-
-        for (Team t: logic.getTeams()) {
-            TitledPane titledPane = new TitledPane();
-            titledPane.setText(t.getName());
-            GridPane grid = new GridPane();
-            
-            grid.add(new Label("Offence"), 0, 1);
-            VBox offPlayers = new VBox();
-            for (Player op : t.getOffencePlayers()) {
-                offPlayers.getChildren().add(new Label(op.getFirstName() + " " + op.getLastName() + " " + op.getNumber()));
-            }
-            grid.add(offPlayers, 1, 1);
-            
-            grid.add(new Label("Defence"), 0, 2);
-            VBox defPlayers = new VBox();
-            for (Player dp : t.getDefencePlayers()) {
-                defPlayers.getChildren().add(new Label(dp.getFirstName() + " " + dp.getLastName() + " " + dp.getNumber()));
-            }
-            grid.add(defPlayers, 1, 2);
-            
-            grid.add(new Label("Goalkeepers"), 0, 3);
-            VBox goalkeepers = new VBox();
-            for (Player goalkeeper : t.getGoalkeepers()) {
-                goalkeepers.getChildren().add(new Label(goalkeeper.getFirstName() + " " + goalkeeper.getLastName() + " " + goalkeeper.getNumber()));
-            }
-            grid.add(goalkeepers, 1, 3);
-            
-            Button addPlayerButton = new Button("Add Player");
-            grid.add(addPlayerButton, 0, 0);
-            Team testTeam = new Team("");
-            try {
-                TitledPane expandedPane = acc.getExpandedPane();
-                System.out.println("expandedPane.getText(): " +expandedPane.getText());
-                testTeam = logic.getTeam(expandedPane.getText());
-                System.out.println("testTeam: " + testTeam.getName()); 
-            } catch (Exception e) {
-    //            e.printStackTrace();
-            }
-        
-            grid.add(getPlayerDetails(addPlayerButton, testTeam, acc.getExpandedPane()),1,0);
-            
-            titledPane.setText(t.getName());
-            titledPane.setContent(grid);
-            acc.getPanes().add(titledPane);
-            
-            
+        for (Team team : logic.getTeams()) {
+            addNewTeamPanel(team.getName(),acc);
         }
-        
-        return acc;
-        
-    }
-    
-    private Tab createBasicTab(String header) {
-        Tab tab = new Tab(header);
+        mainBox.getChildren().addAll(addTeamBox, acc);
+//        mainBox.getChildren().addAll(addTeamBox, teamsInVbox);
+
         tab.setClosable(false);
-        BorderPane paneeli = new BorderPane();
-        tab.setContent(paneeli);
+
+        addTeamBtn.setOnAction(event -> {
+//                System.out.println("teamName.getText(): " + teamName.getText());
+                logic.addTeam(teamName.getText());
+                teamsInVbox.getChildren().add(new Label(teamName.getText()));
+                addNewTeamPanel(teamName.getText(), acc);
+        });
+
         return tab;
     }
     
-
+    private void addNewTeamPanel(String teamName, Accordion acc){
+        TitledPane teamPanel = new TitledPane();
+        teamPanel.setText(teamName);
+        teamPanel.setContent(getTeamVboxLayout(teamName));
+        acc.getPanes().add(teamPanel);
+    }
     
-    private VBox getPlayerDetails(Button addPlayerButton, Team t, TitledPane panel) {
-        VBox playerDetails = new VBox();
-        Label headline = new Label("Firstname,Lastname,number,place:");
-        TextField textField = new TextField();
-        playerDetails.getChildren().addAll(headline, textField);
+    private VBox getTeamVboxLayout(String teamName){
+        VBox teamsVbox = new VBox();
         
-        addPlayerButton.setOnAction(new EventHandler<ActionEvent>() {
+        HBox offencePlayersBox = new HBox();
+        HBox defencePlayersBox = new HBox();
+        HBox goalkeepersPlayersBox = new HBox();
+        offencePlayersBox.getChildren().addAll(new Label("Offence"), getTeamPlayersVBox(teamName, "Offence"));
+        defencePlayersBox.getChildren().addAll(new Label("Defence"), getTeamPlayersVBox(teamName, "defence"));
+        goalkeepersPlayersBox.getChildren().addAll(new Label("Goalkeepers"), getTeamPlayersVBox(teamName, "goalkeepers"));
+        teamsVbox.getChildren().addAll(offencePlayersBox,defencePlayersBox,goalkeepersPlayersBox);
+        
+        GridPane addPlayerToTeam = (GridPane)addPlayerToTeamBoxLayout(teamsVbox, teamName);
+        teamsVbox.getChildren().add(addPlayerToTeam);
+        
+        return teamsVbox;
+    }
+    
+    private VBox getTeamPlayersVBox(String name, String position){
+        VBox playerBox = new VBox();
+        if (position.equalsIgnoreCase("offence") && logic.getTeam(name).getOffencePlayers().size()>0) {
+            for (Player player : logic.getTeam(name).getOffencePlayers()) {
+                Label playerLabel = new Label(player.getFirstName() + " " + player.getLastName());
+                playerBox.getChildren().add(playerLabel);
+            }
+        } else if (position.equalsIgnoreCase("defence") && logic.getTeam(name).getDefencePlayers().size()>0) {
+            for (Player player : logic.getTeam(name).getDefencePlayers()) {
+                Label playerLabel = new Label(player.getFirstName() + " " + player.getLastName());
+                playerBox.getChildren().add(playerLabel);
+            }
+        } else if (position.equalsIgnoreCase("goalkeepers") && logic.getTeam(name).getGoalkeepers().size()>0){
+            for (Player player : logic.getTeam(name).getGoalkeepers()) {
+                Label playerLabel = new Label(player.getFirstName() + " " + player.getLastName());
+                playerBox.getChildren().add(playerLabel);
+            }
+        }
+        return playerBox;
+    }
+    
+    private Node addPlayerToTeamBoxLayout(VBox teamsVbox, String team){
+        GridPane addPlayerGrid = new GridPane();
+        Label player = new Label("Player firstname,lastname,number");
+        Label position = new Label("Position");
+        Button addPlayerBtn = new Button("Add player");
+        TextField playerDetails = new TextField("pekka,pelaaja,33");
+        ComboBox<String> positionComboBox = createPositionComboBox();
+        addPlayerGrid.add(player, 1, 0);
+        addPlayerGrid.add(position, 2, 0);
+        addPlayerGrid.add(addPlayerBtn, 0, 1);
+        addPlayerGrid.add(playerDetails, 1, 1);
+        addPlayerGrid.add(positionComboBox, 2, 1);
+        
+        addPlayerBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                int number = 0;
-                String[] pieces = textField.getText().split(",");
-                try {
-                    number = Integer.parseInt(pieces[2]);
-                } catch (Exception e) {
-                    System.out.println("Nullpointerexc");
-                    System.out.println(e.getStackTrace());
-                    
-                }
-                t.addPlayer(new Player(pieces[0], pieces[1], number), pieces[3]);
-                Player plr = t.getPlayer(pieces[0], pieces[1]);
-                System.out.println("Tallennettiin pelaaja: " + plr.getFirstName() + " " + plr.getLastName());
-                System.out.println("tiimin pelaajat: " + t.toString());
+                addPlayerToTeamFunction(teamsVbox, team, positionComboBox.getValue(),playerDetails.getText());
             }
         });
         
-        return playerDetails;
+        return addPlayerGrid;
     }
+    
+    private ComboBox<String> createPositionComboBox() {
+        ObservableList<String> playersInObsList = FXCollections.observableArrayList();
+        playersInObsList.add("Offence");
+        playersInObsList.add("Defence");
+        playersInObsList.add("Goalkeeper");
+        ComboBox<String> comboBox = new ComboBox<>(playersInObsList);
+        comboBox.getSelectionModel().selectFirst();
+        return comboBox;
+    }
+    
+    private void addPlayerToTeamFunction(VBox teamsVbox, String teamName, String position, String details){
+        String[] pieces = details.split(",");
+        Player plr = new Player();
+        int number = 0;
+        VBox playersPerPositionVbox = new VBox();
+        try {
+            number = Integer.parseInt(pieces[2]);
+        } catch (Exception e) {
+            teamsVbox.getChildren().add(new Label("Converting String to player number failed"));
+            e.printStackTrace();
+        }
+        plr = new Player(pieces[0],pieces[1],number,logic.getTeam(teamName));
+        
+        logic.addPlayerToTeam(plr, position.toLowerCase(),logic.getTeam(teamName));
+        if (position.toLowerCase().equalsIgnoreCase("offence")) {
+            HBox positionHbox = (HBox)teamsVbox.getChildren().get(0);
+            playersPerPositionVbox = (VBox)positionHbox.getChildren().get(1);
+        } else if (position.toLowerCase().equalsIgnoreCase("defence")) {
+            HBox positionHbox = (HBox) teamsVbox.getChildren().get(1);
+            playersPerPositionVbox = (VBox)positionHbox.getChildren().get(1);
+        } else if (position.toLowerCase().equalsIgnoreCase("goalkeeper")) {
+            HBox positionHbox = (HBox) teamsVbox.getChildren().get(2);
+            playersPerPositionVbox = (VBox)positionHbox.getChildren().get(1);
+        }
+        playersPerPositionVbox.getChildren().add(new Label(plr.getFirstName()+" "+plr.getLastName()));
+        
+//        Team t = logic.getTeam(teamName);
+//        Player p = logic.getPlayer(t.getName(), pieces[0], pieces[1]);
+//        System.out.println("t.tostring" + t.toString());
+//        System.out.println("t.getOffplrs.size" + t.getOffencePlayers().size());
+//        System.out.println("t.getDefplrs.size" + t.getDefencePlayers().size());
+//        System.out.println("t.getGoalplrs.size" + t.getGoalkeepers().size());
+
+    }
+
+
     
 
 }
