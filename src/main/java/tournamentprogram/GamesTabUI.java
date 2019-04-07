@@ -108,21 +108,19 @@ public class GamesTabUI {
         if (gameGoalsGrid.getChildren().size() >2) {
             gameGoalsGrid.getChildren().remove(2, gameGoalsGrid.getChildren().size());
         }
-        for (Goal homeGoal : game.getHomeGoals()) {
-            gameGoalsGrid.add(getGameGoalDetailsVbox(homeGoal),0,homeGoal.getIndex());
+        for (Goal homeGoal : logic.getHomeTeamGoals(game)) {
+            gameGoalsGrid.add(getGameGoalDetailsVbox(homeGoal),0,homeGoal.getGoalOrderNumber());
         }
-        for (Goal visitorGoal : game.getVisitorGoals()) {
-            gameGoalsGrid.add(getGameGoalDetailsVbox(visitorGoal),1,visitorGoal.getIndex());
+        for (Goal visitorGoal : logic.getVisitorTeamGoals(game)) {
+            gameGoalsGrid.add(getGameGoalDetailsVbox(visitorGoal),1,visitorGoal.getGoalOrderNumber());
         }
     }
     
     private VBox getGameGoalDetailsVbox(Goal goal) {
         VBox goalBox = new VBox();
-        goalBox.getChildren().addAll(new Label("Scorer:"), new Label(goal.getIndex() + " " + 
+        goalBox.getChildren().addAll(new Label("Scorer:"), new Label(goal.getGoalOrderNumber() + " " + 
                 goal.getScorer().getFullName()), new Label("Assist:"));
-        
-        goal.getAssist().stream()
-                .filter(p -> !"Player Not Found".equalsIgnoreCase(p.getFullName()))
+        goal.getAssistsInArrayList().stream()
                 .forEach(player -> goalBox.getChildren().add(new Label(player.getFullName())));
         return goalBox;
     }
@@ -301,7 +299,12 @@ public class GamesTabUI {
             @Override
             public void handle(ActionEvent event) {
                 if(logic.createGame(logic.getTeam(comboBoxHome.getValue()), logic.getTeam(comboBoxVisitor.getValue()))) {
-                    System.out.println("Added Game: " + logic.getGame(comboBoxHome.getValue(), comboBoxVisitor.getValue()));
+//                    System.out.println("Added Game: " + logic.getGame(comboBoxHome.getValue(), comboBoxVisitor.getValue()));
+                } else {
+//                    System.out.println("Game added else stmt");
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("Team cannot play against itself");
+                    alert.showAndWait();
                 }
                 mainBox.getChildren().remove(1);
                 updateAccordion(mainBox);
@@ -316,7 +319,7 @@ public class GamesTabUI {
         ObservableList<String> teamsInObsList = FXCollections.observableArrayList();
         for (Team team : logic.getTeams()) {
             teamsInObsList.add(team.getName());
-            System.out.println("team: " + team.getName());
+//            System.out.println("team: " + team.getName());
         }
         ComboBox<String> comboBox = new ComboBox<>(teamsInObsList);
         comboBox.getSelectionModel().selectFirst();
