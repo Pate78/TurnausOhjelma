@@ -49,7 +49,7 @@ public class ApplicationLogic {
      */
     public boolean addTeam(String name) {
         if (!name.equals("")) {
-            Team team = new Team(name);
+            Team team = new Team(name, 0 ,0);
 //            this.teams.add(team);
             try {
                 dataManagerTeam.insertOrUpdateTeam(team);
@@ -70,6 +70,7 @@ public class ApplicationLogic {
         ArrayList<Team> teams = new ArrayList<>();
         try {
             teams = dataManagerTeam.getTeams();
+            
         } catch (SQLException se) {
             System.out.println("Error in fetching teams");
         }
@@ -94,7 +95,7 @@ public class ApplicationLogic {
         }
 
         System.out.println("App logic getTeam() returned empty team");
-        return new Team("Team Not Found");
+        return new Team("Team Not Found",0,0);
     }
     
     /**
@@ -208,9 +209,15 @@ public class ApplicationLogic {
      * @param visitor
      * @return 
      */
-    public boolean createGame(Team home, Team visitor, int goalOrderNumber) {
+    public boolean createGame(Team home, Team visitor) {
         if (!home.equals(visitor)) {
-            Game game = new Game(home, visitor, goalOrderNumber);
+            home.setTeamId(home.getName());
+            visitor.setTeamId(visitor.getName());
+            Game game = new Game(home, visitor);
+            
+            if (home.getTeamId() == null) {
+                System.out.println("AppLogic: createGame: homeTeamId: " + home.getTeamId());
+            }
 //            this.games.add(game);
             try {
                 dataManagerGame.insertOrUpdateGame(game);
@@ -230,8 +237,6 @@ public class ApplicationLogic {
      * @return
      */
     public Team getHomeTeamOfGame(Game game) {
-        
-        
         for (Game game1 : games) {
             if (game1.getHomeTeam().getName().equalsIgnoreCase(game.getHomeTeam().getName())) {
                 return game1.getHomeTeam();
@@ -246,44 +251,60 @@ public class ApplicationLogic {
      * @param game
      * @return
      */
-    public Team getVisitorTeamOfGame(Game game) {
-        for (Game game1 : games) {
-            if (game1.getVisitorTeam().getName().equalsIgnoreCase(game.getVisitorTeam().getName())) {
-                return game1.getVisitorTeam();
-            }
-        }
-        System.out.println("App Logic getVisitorTeamOfGame returned null");
-        return null;
-    }
-    
-    /**
-     *
-     * @param home
-     * @param visitor
-     * @return
-     */
-    public Game getGame(String home, String visitor) {
-        for (Game game : games) {
-            System.out.println("Applogic:getGame: game.getGameId(): " + game.getGameId());
-            if (game.getHomeTeam().getName().equalsIgnoreCase(home) && game.getVisitorTeam().getName().equalsIgnoreCase(visitor)) {
-                return game;
-            }
-        }
-        System.out.println("App logic getGame returned null");
-        return null;
-    }
+//    public Team getVisitorTeamOfGame(Game game) {
+//        for (Game game1 : games) {
+//            if (game1.getVisitorTeam().getName().equalsIgnoreCase(game.getVisitorTeam().getName())) {
+//                return game1.getVisitorTeam();
+//            }
+//        }
+//        System.out.println("App Logic getVisitorTeamOfGame returned null");
+//        return null;
+//    }
     
     /**
      *
      * @return
      */
     public ArrayList<Game> getGames() {
+        ArrayList<Game> games = new ArrayList<>();
         try {
-            return dataManagerGame.getGames();
+            games = dataManagerGame.getGames();
         } catch (SQLException e) {
             System.out.println("Error getting games:\n" + e.getMessage());
         }
-        return this.games;
+        if (games.size() == 0) {
+            System.out.println("AppLogic: getGames(): ArrayList games == 0");
+            for (Game game : games) {
+                try {
+//                    Team homeTeam = dataManagerTeam.getTeam(game.getHomeTeam().getTeamId());
+//                    Team visitorTeam = dataManagerTeam.getTeam(game.getVisitorTeam().getTeamId());
+                    int homeTeamGoalsDone = dataManagerTeam.getTeamGoalsDone(game.getHomeTeam());
+                    int visitorTeamGoalsDone = dataManagerTeam.getTeamGoalsDone(game.getVisitorTeam());
+                    int homeGoalsDoneAgainst = dataManagerTeam.getTeamGoalsDoneAgainst(game.getHomeTeam());
+                    int visitorGoalsDoneAgainst = dataManagerTeam.getTeamGoalsDoneAgainst(game.getVisitorTeam());
+                    game.getHomeTeam().setGoalsDone(homeTeamGoalsDone);
+                    game.getVisitorTeam().setGoalsDone(visitorTeamGoalsDone);
+                    game.getHomeTeam().setGoalsDoneAgainst(homeGoalsDoneAgainst);
+                    game.getVisitorTeam().setGoalsDoneAgainst(visitorGoalsDoneAgainst);
+                    ArrayList<Goal> goals = dataManagerGame.getGameGoals(game.getGameId());
+                    for (Goal goal : goals) {
+                        if (goal.getTeamId().equalsIgnoreCase(game.getHomeTeam().getTeamId())) {
+                            game.addHomeGoal(goal);
+                        } else {
+                            game.addVisitorGoal(goal);
+                        }
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Error setting home or visitor team in Applogic: getGames()");
+                }
+
+            }
+        } else {
+            System.out.println("AppLogic: getGames(): games ArrayList greater than 0");
+        }
+        
+        
+        return games;
     }
     
     /**
@@ -306,7 +327,7 @@ public class ApplicationLogic {
 
     
     /**
-     * Method is used to extract search a player from combobox string selection.
+     * Method is used to search a player from combobox string selection.
      * "Player Not Found" is a special player which is always lost (cannot be found anywhere in playfield)
      * and still he is scoring and assisting scores. This player is filtered out of the user interface and
      * his scores will not be counted in personal scores since he is an ass but goals will be added to game.
@@ -376,24 +397,37 @@ public class ApplicationLogic {
 //        for (Player player : players) {
 //            System.out.println("Adding players to Goal: " + player.getFullName());
 //        }
-        System.out.println("Applogic: addHomeGoal: game.getNextGoalOrderNumber: " +game.getNextGoalOrderNumber());
+        int goalsDone = 0;
         try {
-            Goal goal = new Goal(game.getGameId(), game.getNextGoalOrderNumber()+1,
-                    game.getHomeTeam().getTeamId(),
-                    scorer, assist1, assist2, time);
+            goalsDone = dataManagerGame.getGameGoals(game.getGameId()).size();
+        } catch (Exception e) {
+        }
+//        System.out.println("Applogic: addVisitorGoal: game: goalsDone " +
+//                goalsDone);
+        Goal goal = new Goal((goalsDone+1),game.getGameId(),
+                game.getHomeTeam().getTeamId(),
+                scorer, assist1, assist2, time);
+        game.getHomeTeam().addOnetoGoalsDone();
+        game.getVisitorTeam().addOneToGoalsDoneAgainst();
+//        System.out.println("AppLogic: addGoal: getHomeTeam: teamName " + game.getHomeTeam().getName() +", goalsDone: " + game.getHomeTeam().getGoalsDone());
+//        System.out.println("AppLogic: addGoal: getHomeTeam: goalsDoneAgainst: " + game.getHomeTeam().getGoalsDoneAgainst());
+
+        try {
+            game.addHomeGoal(players, (goalsDone+1), game.getHomeTeam().getTeamId(), time);
             dataManagerGame.addOrUpdateGoalToGame(goal, game);
+
+            dataManagerTeam.addGoalToTeam(game.getHomeTeam());
+            dataManagerTeam.insertOrUpdateTeam(game.getVisitorTeam());
         } catch (Exception e) {
             System.out.println("Error adding goal to game:\n" + e.getMessage());
         }
-        game.addHomeGoal(players, game.getNextGoalOrderNumber(), game.getHomeTeam().getTeamId(), time);
 //        Player scorer = getOnePlayerFromComboBoxOfTeam(nameAndNumberStringFromComboBoxScorer, game.getHomeTeam());
 //        Player assist1 = getOnePlayerFromComboBoxOfTeam(nameAndNumberStringFromComboBoxAssist1, game.getHomeTeam());
 //        Player assist2 = getOnePlayerFromComboBoxOfTeam(nameAndNumberStringFromComboBoxAssist2, game.getHomeTeam());
 //
 //        game.addHomeGoal(scorer, assist1, assist2, time);
 //        System.out.println("homegoals.size: " + game.getHomeGoals().size());
-        game.getHomeTeam().setGoalsDone(game.getHomeTeam().getGoalsDone()+1);
-        game.getVisitorTeam().setGoalsDoneAgainst(game.getVisitorTeam().getGoalsDoneAgainst()+1);
+        System.out.println("AppLogic: addHomeGoal");
     }
     
     /**
@@ -417,24 +451,46 @@ public class ApplicationLogic {
         if (!assist2.getFullName().equalsIgnoreCase("Player Not Found")) {
             players.add(assist2);
         }
+        System.out.println("AppLogic: addVisitorGoal");
 //        for (Player player : players) {
 //            System.out.println("Adding players to Goal: " + player.getFullName());
 //        }
-        System.out.println("Applogic: addVisitorGoal: game.getNextGoalOrderNumber: " +game.getNextGoalOrderNumber());
+        int goalsDone = 0;
+        try {
+            goalsDone = dataManagerGame.getGameGoals(game.getGameId()).size();
+        } catch (SQLException e) {
+            System.out.println("Error getting game goals:\n" + e.getMessage());
+        }
 
         try {
-            Goal goal = new Goal(game.getGameId(), game.getNextGoalOrderNumber()+1,
+            Goal goal = new Goal((goalsDone+1), game.getGameId(),
                     game.getVisitorTeam().getTeamId(),
                     scorer, assist1, assist2, time);
 //            System.out.println("AppLogic: addVisitorGoalToGame: goal teamId" + goal.getTeamId());
-            game.addVisitorGoal(players, game.getNextGoalOrderNumber(), game.getVisitorTeam().getTeamId(), time);
+            game.addVisitorGoal(players, (goalsDone+1), game.getVisitorTeam().getTeamId(), time);
             dataManagerGame.addOrUpdateGoalToGame(goal, game);
+
+//            System.out.println("AppLogic: addVisitorGoal: game.getVisitorTeam().getGoalsDone(): visitorTeamName: " +
+//                    game.getVisitorTeam().getName() + " goalsDone:" +game.getVisitorTeam().getGoalsDone());
+            game.getVisitorTeam().addOnetoGoalsDone();
+            game.getHomeTeam().addOneToGoalsDoneAgainst();
+
+            dataManagerTeam.insertOrUpdateTeam(game.getHomeTeam());
+            dataManagerTeam.insertOrUpdateTeam(game.getVisitorTeam());
         } catch (Exception e) {
             System.out.println("Error adding goal to game:\n" + e.getMessage());
         }
+    }
         
-        game.getVisitorTeam().setGoalsDone(game.getVisitorTeam().getGoalsDone()+1);
-        game.getHomeTeam().setGoalsDoneAgainst(game.getHomeTeam().getGoalsDoneAgainst()+1);
+    public boolean removeGoalFromGame(String goalId) {
+        try {
+            Goal goalToRemove = dataManagerGame.getGoal(goalId);
+            dataManagerGame.removeGoalFromGame(goalToRemove);
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error removing a goal from game:\n" + e.getMessage());
+            return false;
+        }
     }
     
     /**
@@ -464,21 +520,6 @@ public class ApplicationLogic {
         return new ArrayList<>();
     }
     
-    /**
-     *
-     * @param game
-     * @return
-     */
-//    public ArrayList<Goal> getVisitorTeamGoals(Game game) {
-//        for (Game game1 : games) {
-//            if (game1.equals(game)) {
-//                return game.getVisitorGoals();
-//            }
-//        }
-//        System.out.println("returning empty list of visitor goals");
-//        return new ArrayList<>();
-//    }
-    
     public Player getScorerOfGoal(Goal goal) {
         Player scorer = new Player();
         try {
@@ -505,6 +546,10 @@ public class ApplicationLogic {
         return assists;
     }
     
+//    public boolean removeGoalFromGame(String goalId) {
+//        
+//    }
+    
     /**
      * Statistics tab methods
      * @return 
@@ -517,7 +562,12 @@ public class ApplicationLogic {
         } catch (SQLException e) {
             System.out.println("Error fetching teams from DB!!!\n" + e.getMessage());
         }
-        Collections.sort(teams);
+//        Collections.sort(teams);
+        for (Team team : teams) {
+//            System.out.println("AppLogic: getTeamsSorted(): teamName: "+team.getName() +
+//                    ", team.getGoalsdone: " + team.getGoalsDone() + 
+//                    ", team.getGoalsDoneAgainst: " + team.getGoalsDoneAgainst());
+        }
         return teams;
     }
     
